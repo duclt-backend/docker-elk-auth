@@ -22,6 +22,31 @@ sudo chmod -R 777 /path_to_project/data
 ## Issue Note
 - When memory host contain volumn low. Docker kibana automatically down.
 
+## Create SSL
+- Change `xpack.security.enabled` to `false`
+- Run `docker-compose exec elasticsearch bash`
+```
+[root@c9f915e86309 elasticsearch]# bin/elasticsearch-certutil ca
+
+[root@c9f915e86309 elasticsearch]# bin/elasticsearch-certutil cert --ca elastic-stack-ca.p12
+
+```
+- Press `Ctrl + D` to exit container
+- Run `docker cp "$(docker-compose ps -q elasticsearch)":/usr/share/elasticsearch/elastic-certificates.p12 .` to copy `elastic-stack-ca.p12` to current folder
+- Add `./elastic-certificates.p12:/usr/share/elasticsearch/config/elastic-certificates.p12` to `docker-compose.yml`
+- `elasticsearch.yml`
+```sh
+cluster.name: my-elasticsearch-cluster
+network.host: 0.0.0.0
+xpack.security.enabled: true
+xpack.security.transport.ssl.enabled: true
+# xpack.security.transport.ssl.keystore.type: PKCS12
+# xpack.security.transport.ssl.verification_mode: certificate
+# xpack.security.transport.ssl.keystore.path: elastic-certificates.p12
+# xpack.security.transport.ssl.truststore.path: elastic-certificates.p12
+# xpack.security.transport.ssl.truststore.type: PKCS12
+```
+
 ## Exploring Your Cluster
 Using cURL in the [Console](http://localhost:5601/app/kibana#/dev_tools/console?_g=()) to:
 
