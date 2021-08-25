@@ -1,0 +1,58 @@
+version: "3"
+
+services:
+    es1:
+        image: docker.elastic.co/elasticsearch/elasticsearch:${ELASTIC_VERSION}
+        environment:
+            - cluster.name=docker-cluster-7x
+            - cluster.initial_master_nodes=es1
+            - http.cors.enabled=true
+            - http.cors.allow-origin=*
+            - node.name=es1
+            # - discovery.seed_hosts=es02
+            - bootstrap.memory_lock=true
+            - "ELASTIC_USERNAME=${ELASTIC_USERNAME}"
+            - "ELASTIC_PASSWORD=${ELASTIC_PASSWORD}"
+            - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+        volumes:
+            - ./elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+            - ${ELASTIC_PATH-./data/esdata-vn}:/usr/share/elasticsearch/data
+            # - ./elastic-certificates.p12:/usr/share/elasticsearch/config/elastic-certificates.p12
+        ulimits:
+            memlock:
+                soft: -1
+                hard: -1
+            nofile:
+                soft: 65536
+                hard: 65536
+        ports:
+            - ${ELASTIC_PORT}:9200
+        networks:
+            - esnet
+
+    kibana:
+        image: docker.elastic.co/kibana/kibana:${ELASTIC_VERSION}
+        ports:
+            - 5602:5601
+        volumes:
+            - ${KIBANA_PATH-./kibana/kibana.yml}:/usr/share/kibana/config/kibana.yml
+        networks:
+            - esnet
+        logging:
+            options:
+                max-size: "1g"
+                max-file: "5"
+
+# logstash:
+#   image: docker.elastic.co/logstash/logstash:${ELASTIC_VERSION}
+#   volumes:
+#     - ./logstash/logstash.conf/:/usr/share/logstash/pipeline/logstash.conf
+#     - ./logstash/logstash.yml/:/usr/share/logstash/config/logstash.yml
+#   networks:
+#     - esnet
+volumes:
+    esdata-vn:
+        driver: local
+
+networks:
+    esnet:

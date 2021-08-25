@@ -1,0 +1,12 @@
+server.name: kibana
+server.host: "0"
+elasticsearch.hosts:
+  - "http://es1:9200"
+  - "http://es2:9200"
+
+elasticsearch.username: elastic
+elasticsearch.password: elastic
+
+xpack.monitoring.ui.container.elasticsearch.enabled: true
+# xpack.monitoring.collection.enabled: true
+# xpack.monitoring.kibana.collection.enabled: false
